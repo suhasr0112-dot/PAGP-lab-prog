@@ -1,0 +1,41 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <omp.h>
+
+int main() {
+    int limit = 100000000;
+
+    // Allocate memory and initialize all values to 0
+    char *composite = calloc(limit + 1, sizeof(char));
+
+    double start = omp_get_wtime();
+
+    // Sieve of Eratosthenes
+    int root = sqrt(limit);
+
+    for (int i = 2; i <= root; i++) {
+        if (composite[i] == 0) {
+            for (int j = i * i; j <= limit; j += i) {
+                composite[j] = 1;
+            }
+        }
+    }
+
+    // Count prime numbers using OpenMP
+    int count = 0;
+
+    #pragma omp parallel for reduction(+:count)
+    for (int i = 2; i <= limit; i++) {
+        if (composite[i] == 0)
+            count++;
+    }
+
+    printf("Number of primes: %d\n", count);
+    printf("Time: %f seconds\n", omp_get_wtime() - start);
+
+    free(composite);
+
+    return 0;
+}
